@@ -4,101 +4,104 @@ This file is the short, persistent resume point for humans and coding agents. Re
 
 ## Current state
 
-- Current phase: **Phase 2 — India identity / provenance bridge**
-- Current working branch: `tradebrain-phase2-identity`
-- Parent phase branch: `tradebrain-phase1-profile`
+- Current phase: **Phase 3 — verified India identity hydration + BSE decision-context foundation**
+- Current working branch: `tradebrain-phase3-hydration-context`
+- Parent phase branch: `tradebrain-phase2-identity`
 - Parent integration branch: `tradebrain-bootstrap`
 - Upstream baseline: `HKUDS/Vibe-Trading@1907e47d31d72f34bc2c87e0e5c4f750c83da59d`
 - Vibe package version: `0.1.14`
-- Trading behavior changed by TradeBrain so far: **NO — custom profile/identity code is not wired into existing Vibe runtime decision paths yet**
+- Trading behavior changed by TradeBrain so far: **NO — TradeBrain remains outside existing Vibe runtime decision/order paths**
 - Broker/execution behavior changed by TradeBrain so far: **NO**
 - Frontend behavior changed by TradeBrain so far: **NO**
 - Phase 1 targeted tests: **10 PASSED**
-- Phase 2 targeted tests: **12 PASSED in isolated validation using the exact Phase 2 module/test contents**
+- Phase 2 targeted tests: **12 PASSED**
+- Phase 3 targeted tests: **15 PASSED in isolated validation**
 - Full upstream Vibe CI: **PENDING / NOT CLAIMED PASS**
 
 ## Completed
 
-- [x] User fork established: `ramguptakrl/Vibe-Trading`.
-- [x] Upstream fork frozen at the recorded baseline before customization.
-- [x] `tradebrain-bootstrap` created with the canonical reframing specification.
-- [x] Phase 0 baseline / architecture / safety checkpoint created.
-- [x] Phase 1 additive `tradebrain_bse` profile foundation created.
-- [x] `tradebrain_bse` remains opt-in and normal Vibe behavior remains available.
-- [x] Phase 1 hard policy contract encodes advisory-only, auto-execution OFF, DAY 15:15 IST cutoff, DAY long/short, SWING long-only + MTF, AI no-hard-rule override, and retired L1/L2/L3/rescue averaging disabled.
-- [x] Draft PR #1 records Phase 1 against the Phase 0 checkpoint.
-- [x] Phase 2 branch created from the validated Phase 1 branch.
-- [x] Vibe generic `Entity` / `Security` models reviewed and selected for reuse.
-- [x] Vibe India broker/Yahoo symbol conventions reviewed and selected for reuse.
-- [x] Vibe `EvidenceInput` provenance fields reviewed and selected for reuse.
-- [x] Strict TradeBrain India identity layer implemented under `agent/src/tradebrain/identity.py`.
-- [x] ISIN normalization validates structure + checksum and rejects placeholders/malformed IDs.
-- [x] Issuer -> canonical ISIN security -> NSE/BSE listing hierarchy implemented.
-- [x] Exact resolver supports ISIN, exchange+symbol, exchange security ID, and explicitly qualified project symbols.
-- [x] Resolver deliberately refuses fuzzy company/symbol guessing.
-- [x] Conflict detection prevents one exact listing from silently remapping to another ISIN.
-- [x] Adapters preserve canonical ISIN as Vibe `Security.instrument_id` across multiple exchange listings.
-- [x] Immutable identity provenance receipt implemented with timezone-aware retrieval time and optional raw artifact SHA-256.
-- [x] Provenance adapter reuses Vibe's existing `EvidenceInput` rather than creating another evidence ledger.
-- [x] `TRADEBRAIN_PHASE2_IDENTITY.md` documents the architecture, reuse decisions and unbuilt gaps.
-- [x] Targeted Phase 2 validation executed: **12 passed**.
+- [x] Fork/bootstrap/master specification established.
+- [x] Phase 0 baseline / architecture / safety checkpoint established.
+- [x] Phase 1 opt-in `tradebrain_bse` policy foundation implemented.
+- [x] Phase 2 issuer -> canonical ISIN security -> NSE/BSE listing identity model implemented.
+- [x] Phase 2 exact resolver and Vibe evidence/provenance bridge implemented.
+- [x] Phase 3 branch created from the exact Phase 2 commit.
+- [x] Verified source authority boundary implemented for NSE/BSE official domains plus future local verified storage.
+- [x] Canonical sanitized security-master row contract implemented; raw column guessing is intentionally excluded.
+- [x] Hydrator merges observations only by checksum-valid ISIN.
+- [x] Conflicting issuer/security/listing identity facts fail closed.
+- [x] Multiple official observations can corroborate one exact listing while preserving separate provenance.
+- [x] Missing from a source snapshot is not treated as a delisting fact.
+- [x] BSE Ltd verified bootstrap identity established from official NSE-hosted sources.
+- [x] BSE Ltd canonical guard: `INE118H01025` / CIN `L67120MH2005PLC155188` / `NSE:BSE`.
+- [x] BSE Ltd Vibe market-data code resolves to `BSE.NS`.
+- [x] Phase 3 does not invent a `BSE:BSE` listing.
+- [x] BSE decision-context foundation created with identity ready and all downstream decision layers explicitly not ready.
+- [x] `decision_ready` remains false until market data, intelligence, structure, historical outcomes and hard-rule arbiter are supplied.
+- [x] Phase 3 targeted validation executed: **15 passed**.
+- [x] `TRADEBRAIN_PHASE3_HYDRATION_CONTEXT.md` records architecture, official bootstrap evidence, limitations and next step.
 
 ## Validation / integration still pending
 
-- [ ] Obtain a real baseline/full upstream test or CI run; do not label upstream tests PASS until actually observed.
-- [ ] Confirm Phase 2 imports in a clean checkout of the complete repository, not only isolated contract validation.
-- [ ] Do not claim the profile structurally blocks broker writes yet; the Phase 1 policy is not wired into Vibe's live/order registry.
-- [ ] Do not claim Phase 2 identity is persisted yet; no old TradeBrain DuckDB tables were copied or migrated.
-- [ ] Do not claim official NSE/BSE security masters are feeding the new index yet.
-- [ ] Do not claim corporate events use the new resolver yet.
+- [ ] Obtain a real full upstream test/CI run; do not label upstream tests PASS until actually observed.
+- [ ] Confirm Phase 3 imports against a complete clean checkout/package install, not only isolated contract validation.
+- [ ] Do not claim the Phase 1 profile structurally blocks broker writes; it is still not wired into Vibe's live/order registry.
+- [ ] Do not claim automatic NSE/BSE network security-master ingestion; Phase 3 accepts sanitized verified rows/snapshots.
+- [ ] Do not claim identity persistence; no DuckDB migration has occurred.
+- [ ] Do not claim corporate announcements/events are identity-resolved yet.
+- [ ] Do not claim BSE market data, structure, Crash Guard, historical outcomes or final guidance are implemented yet.
 
 ## Hard boundaries — do not silently change
 
 - `main` is not the development target for unreviewed TradeBrain work.
-- Preserve upstream capabilities unless the master spec explicitly justifies an override.
+- Preserve upstream Vibe capabilities unless the master specification explicitly justifies an override.
 - No big-bang rewrite.
 - No credentials, API keys, broker tokens or private local databases in Git.
 - Exchange symbol != canonical security identity.
-- ISIN is the cross-exchange security identity for this Indian-security layer.
-- Never merge different ISINs because company names look similar.
-- Never infer an exchange from an unqualified bare symbol inside the strict identity resolver.
-- Missing from the latest source does not by itself prove delisting.
+- ISIN is the cross-exchange security identity for the Indian-security layer.
+- Never merge different ISINs because names look similar.
+- Never infer an exchange from an unqualified bare symbol inside the strict resolver.
+- Missing from a source snapshot does not prove delisting.
+- Official identity authority must remain traceable to provenance.
+- Correct identity alone is not a trading decision.
 - BSE final guidance remains evidence-driven, not `indicator -> BUY/SELL`.
-- AI is context/reasoning, not the deterministic market-data source or hard-rule authority.
-- DAY flat-by-15:15 IST is immutable under the current policy.
-- SWING/POSITION is currently long-only and MTF-funded.
-- Retired L1/L2/L3 rescue averaging must not return to active logic.
-- Crash Guard blocks/risk-gates where designated; it does not automatically create a short setup.
-- Hard rules are never silently optimized away by backtesting/learning.
-- Normal Vibe-Trading behavior must remain available outside the custom profile.
+- AI is context/reasoning, not deterministic market data or hard-rule authority.
+- DAY flat-by-15:15 IST remains immutable.
+- SWING/POSITION remains long-only and MTF-funded under the current policy.
+- Retired L1/L2/L3 rescue averaging must not return.
+- Crash Guard blocks/risk-gates; it does not itself create a short setup.
+- Hard rules are never silently optimized away.
+- Normal Vibe-Trading behavior remains available outside the custom profile.
 
 ## Next intended engineering phase
 
-**Phase 3 — verified India identity hydration + BSE decision-context foundation**
-
-Goal: connect the strict Phase 2 identity contract to narrow, verified inputs without importing the old TradeBrain application wholesale, then begin the BSE-specific context layer on top of canonical identity.
+**Phase 4 — read-only BSE market-data + company-event context**
 
 Preferred sequence:
 
-1. define a repository/loader interface that can hydrate verified identity bundles;
-2. add a safe adapter for sanitized/official NSE/BSE security-master rows or future local TradeBrain storage;
-3. keep raw-source provenance attached;
-4. prove BSE Ltd resolves canonically before using it in BSE-specific decision logic;
-5. only then begin market-structure / historical-context integration.
+1. attach historical/live read-only market observations to canonical `NSE:BSE` / `INE118H01025`;
+2. reuse Vibe's India/Yahoo/broker data interfaces rather than replace them;
+3. enforce source timestamp/freshness and symbol/ISIN binding;
+4. add official NSE company-announcement/corporate-action evidence behind the same identity;
+5. assemble a richer BSE context envelope;
+6. still do not generate live orders.
 
-Do not jump directly into automatic execution, broad UI redesign, or a destructive database migration.
+Market structure, Crash Guard and historical outcome learning should follow only after the data/event envelope is reliable.
 
 ## Resume instruction
 
 For a new chat/agent:
 
-1. Inspect the current GitHub branch and latest commits.
-2. Read `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-21.txt`.
-3. Read `TRADEBRAIN_PHASE0_BASELINE.md`.
-4. Read `TRADEBRAIN_PHASE2_IDENTITY.md`.
-5. Read this file.
-6. Inspect `agent/src/tradebrain/profile.py`.
-7. Inspect `agent/src/tradebrain/identity.py`.
-8. Inspect `agent/tests/test_tradebrain_bse_profile.py` and `agent/tests/test_tradebrain_identity.py`.
-9. Inspect draft PRs/check results without assuming mergeability means correctness.
-10. Verify what is actually implemented and what has actually passed tests before claiming a feature exists.
+1. inspect the current GitHub branch and latest commits;
+2. read the master specification;
+3. read `TRADEBRAIN_PHASE0_BASELINE.md`;
+4. read `TRADEBRAIN_PHASE2_IDENTITY.md`;
+5. read `TRADEBRAIN_PHASE3_HYDRATION_CONTEXT.md`;
+6. read this file;
+7. inspect `agent/src/tradebrain/profile.py`;
+8. inspect `agent/src/tradebrain/identity.py`;
+9. inspect `agent/src/tradebrain/hydration.py`;
+10. inspect `agent/src/tradebrain/bse_context.py`;
+11. inspect Phase 1/2/3 tests and draft PRs;
+12. verify implemented vs pending features before making claims;
+13. continue with Phase 4 without bypassing the identity/provenance boundary.
