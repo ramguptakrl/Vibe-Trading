@@ -1,17 +1,19 @@
 # TradeBrain + BSE Integration — Implementation Status
 
-This file is the short, persistent resume point for humans and coding agents. Read it together with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-21.txt` and the actual branch diff before changing code.
+This file is the short, persistent resume point for humans and coding agents. Read it together with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-21.txt`, `TRADEBRAIN_PHASE0_BASELINE.md`, and the actual branch diff before changing code.
 
 ## Current state
 
-- Current phase: **Phase 0 — Baseline / integration freeze**
-- Current working branch: `tradebrain-phase0-baseline`
+- Current phase: **Phase 1 — `tradebrain_bse` profile foundation**
+- Current working branch: `tradebrain-phase1-profile`
+- Parent phase branch: `tradebrain-phase0-baseline`
 - Parent integration branch: `tradebrain-bootstrap`
 - Upstream baseline: `HKUDS/Vibe-Trading@1907e47d31d72f34bc2c87e0e5c4f750c83da59d`
 - Vibe package version: `0.1.14`
-- Trading behavior changed by TradeBrain so far: **NO**
+- Trading behavior changed by TradeBrain so far: **NO — profile is not wired into existing Vibe runtime paths yet**
 - Broker/execution behavior changed by TradeBrain so far: **NO**
 - Frontend behavior changed by TradeBrain so far: **NO**
+- Phase 1 targeted tests: **AUTHORED; EXECUTION/CI RESULT PENDING**
 
 ## Completed
 
@@ -22,14 +24,19 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - [x] `tradebrain-phase0-baseline` created from `tradebrain-bootstrap`.
 - [x] Baseline architecture/safety audit documented in `TRADEBRAIN_PHASE0_BASELINE.md`.
 - [x] Existing Vibe India, research, backtest, governance and safety systems selected for reuse instead of wholesale replacement.
+- [x] `tradebrain-phase1-profile` created from the Phase 0 checkpoint.
+- [x] Additive `agent/src/tradebrain/` namespace designed so imports do not mutate upstream runtime state.
+- [x] Minimal `tradebrain_bse` policy contract implemented.
+- [x] Explicit opt-in resolver uses `VIBE_TRADING_PROFILE=tradebrain_bse`; absent/unknown values keep the custom profile OFF.
+- [x] Policy contract encodes advisory-only, auto-execution OFF, BSE Ltd / `NSE:BSE`, DAY 15:15 IST cutoff, DAY long/short allowed, SWING long-only + MTF funding, AI no-hard-rule override, and retired L1/L2/L3/rescue averaging disabled.
+- [x] Phase 1 regression tests authored for default-OFF behavior, exact opt-in, immutable policy values and hard boundaries.
 
-## Pending before/with Phase 1
+## Validation still pending
 
-- [ ] Obtain a real baseline test/CI run; do not label tests PASS until actually observed.
-- [ ] Design the minimal `tradebrain_bse` profile contract.
-- [ ] Add profile scaffolding without changing normal Vibe behavior.
-- [ ] Add tests proving profile OFF preserves upstream/default behavior.
-- [ ] Add tests proving BSE profile is advisory-only and cannot bypass designated hard rules.
+- [ ] Obtain a real baseline/full test or CI run; do not label upstream tests PASS until actually observed.
+- [ ] Run targeted `agent/tests/test_tradebrain_bse_profile.py` and record the result.
+- [ ] Confirm package/import checks in CI or a clean local environment.
+- [ ] Do not claim the profile structurally blocks broker writes yet: Phase 1 defines the policy boundary but deliberately does not wire it into Vibe's existing live/order registry.
 
 ## Hard boundaries — do not silently change
 
@@ -45,14 +52,15 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - Crash Guard blocks/risk-gates where designated; it does not automatically create a short setup.
 - Hard rules are never silently optimized away by backtesting/learning.
 - Normal Vibe-Trading behavior must remain available outside the custom profile.
+- Phase 1 profile code must remain additive until narrow integration points are explicitly designed and tested.
 
 ## Next intended engineering phase
 
-**Phase 1 — `tradebrain_bse` profile foundation**
+**Phase 2 — India identity / provenance bridge design**
 
-Goal: introduce the smallest possible configuration/profile boundary that allows future BSE-specific logic to be added without globally rewriting Vibe-Trading.
+Goal: reuse Vibe's platform while adding TradeBrain's stronger Indian security/entity identity concepts (company -> canonical security/ISIN -> exchange listings) and provenance boundaries without copying the old application wholesale.
 
-Phase 1 should initially establish only policy/configuration boundaries and regression tests. Do not jump directly into Kite, indicators, Crash Guard porting, UI redesign, TradeBrain database migration, or live execution.
+Before Phase 2 changes production paths, validate the Phase 1 tests and choose narrow interfaces for identity lookup and evidence provenance. Do not jump directly into Kite, indicators, Crash Guard porting, UI redesign, TradeBrain database migration, or live execution.
 
 ## Resume instruction
 
@@ -62,5 +70,6 @@ For a new chat/agent:
 2. Read `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-21.txt`.
 3. Read `TRADEBRAIN_PHASE0_BASELINE.md`.
 4. Read this file.
-5. Verify what is actually implemented in code before claiming a feature exists.
-6. Continue from the unchecked items above, preserving hard boundaries.
+5. Inspect `agent/src/tradebrain/profile.py` and `agent/tests/test_tradebrain_bse_profile.py`.
+6. Verify what is actually implemented and what has actually passed tests before claiming a feature exists.
+7. Continue from the unchecked validation items and the next phase, preserving hard boundaries.
