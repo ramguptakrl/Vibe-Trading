@@ -4,9 +4,9 @@ This file is the short, persistent resume point for humans and coding agents. Re
 
 ## Current state
 
-- Current phase: **Phase 3 — verified India identity hydration + BSE decision-context foundation**
-- Current working branch: `tradebrain-phase3-hydration-context`
-- Parent phase branch: `tradebrain-phase2-identity`
+- Current phase: **Phase 4 — read-only BSE market data + official issuer intelligence**
+- Current working branch: `tradebrain-phase4-data-intelligence`
+- Parent phase branch: `tradebrain-phase3-hydration-context`
 - Parent integration branch: `tradebrain-bootstrap`
 - Upstream baseline: `HKUDS/Vibe-Trading@1907e47d31d72f34bc2c87e0e5c4f750c83da59d`
 - Vibe package version: `0.1.14`
@@ -15,8 +15,9 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - Frontend behavior changed by TradeBrain so far: **NO**
 - Phase 1 targeted tests: **10 PASSED**
 - Phase 2 targeted tests: **12 PASSED**
-- Phase 3 targeted tests: **15 PASSED in isolated validation**
-- Full upstream Vibe CI: **PENDING / NOT CLAIMED PASS**
+- Phase 3 targeted tests: **15 PASSED**
+- Phase 4 targeted tests: **18 PASSED in isolated validation**
+- Full upstream Vibe CI: **NOT CLAIMED PASS unless a completed workflow is explicitly recorded below**
 
 ## Completed
 
@@ -25,31 +26,37 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - [x] Phase 1 opt-in `tradebrain_bse` policy foundation implemented.
 - [x] Phase 2 issuer -> canonical ISIN security -> NSE/BSE listing identity model implemented.
 - [x] Phase 2 exact resolver and Vibe evidence/provenance bridge implemented.
-- [x] Phase 3 branch created from the exact Phase 2 commit.
-- [x] Verified source authority boundary implemented for NSE/BSE official domains plus future local verified storage.
-- [x] Canonical sanitized security-master row contract implemented; raw column guessing is intentionally excluded.
-- [x] Hydrator merges observations only by checksum-valid ISIN.
-- [x] Conflicting issuer/security/listing identity facts fail closed.
-- [x] Multiple official observations can corroborate one exact listing while preserving separate provenance.
-- [x] Missing from a source snapshot is not treated as a delisting fact.
-- [x] BSE Ltd verified bootstrap identity established from official NSE-hosted sources.
-- [x] BSE Ltd canonical guard: `INE118H01025` / CIN `L67120MH2005PLC155188` / `NSE:BSE`.
-- [x] BSE Ltd Vibe market-data code resolves to `BSE.NS`.
-- [x] Phase 3 does not invent a `BSE:BSE` listing.
-- [x] BSE decision-context foundation created with identity ready and all downstream decision layers explicitly not ready.
-- [x] `decision_ready` remains false until market data, intelligence, structure, historical outcomes and hard-rule arbiter are supplied.
-- [x] Phase 3 targeted validation executed: **15 passed**.
-- [x] `TRADEBRAIN_PHASE3_HYDRATION_CONTEXT.md` records architecture, official bootstrap evidence, limitations and next step.
+- [x] Phase 3 verified identity hydration contract implemented.
+- [x] BSE Ltd canonical guard established: `INE118H01025` / CIN `L67120MH2005PLC155188` / `NSE:BSE` / `BSE.NS`.
+- [x] Phase 3 decision-context envelope created with identity ready and downstream layers explicitly not ready.
+- [x] Phase 4 branch created from the exact Phase 3 checkpoint.
+- [x] Existing Vibe `india_equity` loader registry/fallback chain reviewed and reused rather than replaced.
+- [x] Read-only BSE market-data bridge implemented around Vibe `resolve_loader("india_equity")`.
+- [x] Exact BSE identity/symbol binding enforced before market data can enter TradeBrain.
+- [x] OHLCV timestamps/columns/numeric geometry validated; duplicate/future/invalid bars fail closed.
+- [x] Normalized immutable bars receive deterministic SHA-256 provenance.
+- [x] Market-data freshness is explicit; `UNKNOWN` or `STALE` cannot mark the layer ready.
+- [x] Market-data observations map into Vibe `EvidenceInput` without creating a second evidence ledger.
+- [x] Official NSE/BSE issuer-intelligence source contract implemented with HTTPS/domain authority checks.
+- [x] Sanitized issuer events require exact ISIN and/or exact exchange+symbol identity.
+- [x] Conflicting ISIN/listing facts fail closed; company-name-looking text is never used as identity.
+- [x] Point-in-time event filtering excludes events published after `as_of`.
+- [x] Fresh official scans with zero matching events are preserved as valid coverage evidence.
+- [x] Phase-4 composition advances only `market_data_ready` and `intelligence_ready`; structure/history/hard-rule layers stay false.
+- [x] `decision_ready` remains false after Phase 4 by design.
+- [x] Phase 4 targeted validation executed: **18 passed**.
+- [x] `TRADEBRAIN_PHASE4_DATA_INTELLIGENCE.md` records architecture, reuse decisions, limitations and next step.
 
 ## Validation / integration still pending
 
-- [ ] Obtain a real full upstream test/CI run; do not label upstream tests PASS until actually observed.
-- [ ] Confirm Phase 3 imports against a complete clean checkout/package install, not only isolated contract validation.
+- [ ] Obtain/record a completed full upstream test or CI run before claiming the whole Vibe repository passes.
+- [ ] Confirm Phase 4 imports in a complete clean checkout/package install, not only isolated contract validation.
 - [ ] Do not claim the Phase 1 profile structurally blocks broker writes; it is still not wired into Vibe's live/order registry.
-- [ ] Do not claim automatic NSE/BSE network security-master ingestion; Phase 3 accepts sanitized verified rows/snapshots.
-- [ ] Do not claim identity persistence; no DuckDB migration has occurred.
-- [ ] Do not claim corporate announcements/events are identity-resolved yet.
-- [ ] Do not claim BSE market data, structure, Crash Guard, historical outcomes or final guidance are implemented yet.
+- [ ] Do not claim automatic NSE/BSE identity/security-master network ingestion; hydration still consumes sanitized verified snapshots.
+- [ ] Do not claim automatic NSE announcement/corporate-action network ingestion; Phase 4 defines the verified source/event contract only.
+- [ ] Do not claim identity/event persistence; no DuckDB migration has occurred.
+- [ ] Do not claim market structure, Crash Guard, historical outcomes, MTF cost engine or final guidance are implemented yet.
+- [ ] Do not claim Kite is integrated yet.
 
 ## Hard boundaries — do not silently change
 
@@ -58,12 +65,14 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - No big-bang rewrite.
 - No credentials, API keys, broker tokens or private local databases in Git.
 - Exchange symbol != canonical security identity.
-- ISIN is the cross-exchange security identity for the Indian-security layer.
+- ISIN remains the cross-exchange security identity for the Indian-security layer.
 - Never merge different ISINs because names look similar.
 - Never infer an exchange from an unqualified bare symbol inside the strict resolver.
 - Missing from a source snapshot does not prove delisting.
-- Official identity authority must remain traceable to provenance.
-- Correct identity alone is not a trading decision.
+- Official facts must remain traceable to provenance.
+- Fresh source check with zero events is different from no source check.
+- Market-data freshness thresholds must be explicit; unknown freshness cannot become decision-ready.
+- Correct identity + fresh prices + official-event coverage still do not constitute a trading decision.
 - BSE final guidance remains evidence-driven, not `indicator -> BUY/SELL`.
 - AI is context/reasoning, not deterministic market data or hard-rule authority.
 - DAY flat-by-15:15 IST remains immutable.
@@ -75,18 +84,18 @@ This file is the short, persistent resume point for humans and coding agents. Re
 
 ## Next intended engineering phase
 
-**Phase 4 — read-only BSE market-data + company-event context**
+**Phase 5 — BSE market structure + Crash Guard foundation**
 
 Preferred sequence:
 
-1. attach historical/live read-only market observations to canonical `NSE:BSE` / `INE118H01025`;
-2. reuse Vibe's India/Yahoo/broker data interfaces rather than replace them;
-3. enforce source timestamp/freshness and symbol/ISIN binding;
-4. add official NSE company-announcement/corporate-action evidence behind the same identity;
-5. assemble a richer BSE context envelope;
-6. still do not generate live orders.
+1. consume Phase-4 immutable BSE bars instead of fetching a second price series;
+2. derive/validate required timeframes without look-ahead;
+3. model trend/regime and major structural support/resistance;
+4. add comparable-ATH state;
+5. implement Crash Guard as a deterministic risk gate, not a trade signal;
+6. prove historical decisions cannot see future bars/events.
 
-Market structure, Crash Guard and historical outcome learning should follow only after the data/event envelope is reliable.
+Historical outcome learning, MTF economics and final DAY/SWING guidance should follow only after structure/risk inputs are reliable.
 
 ## Resume instruction
 
@@ -97,11 +106,14 @@ For a new chat/agent:
 3. read `TRADEBRAIN_PHASE0_BASELINE.md`;
 4. read `TRADEBRAIN_PHASE2_IDENTITY.md`;
 5. read `TRADEBRAIN_PHASE3_HYDRATION_CONTEXT.md`;
-6. read this file;
-7. inspect `agent/src/tradebrain/profile.py`;
-8. inspect `agent/src/tradebrain/identity.py`;
-9. inspect `agent/src/tradebrain/hydration.py`;
+6. read `TRADEBRAIN_PHASE4_DATA_INTELLIGENCE.md`;
+7. read this file;
+8. inspect `agent/src/tradebrain/profile.py`;
+9. inspect `agent/src/tradebrain/identity.py` and `hydration.py`;
 10. inspect `agent/src/tradebrain/bse_context.py`;
-11. inspect Phase 1/2/3 tests and draft PRs;
-12. verify implemented vs pending features before making claims;
-13. continue with Phase 4 without bypassing the identity/provenance boundary.
+11. inspect `agent/src/tradebrain/market_data.py`;
+12. inspect `agent/src/tradebrain/intelligence.py`;
+13. inspect `agent/src/tradebrain/data_intelligence.py`;
+14. inspect Phase 1-4 tests and draft PRs/check results;
+15. verify implemented vs pending features before making claims;
+16. continue with Phase 5 without bypassing identity, provenance, freshness or point-in-time boundaries.
