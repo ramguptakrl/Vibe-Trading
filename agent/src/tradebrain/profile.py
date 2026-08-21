@@ -1,14 +1,8 @@
 """Immutable policy contract for the opt-in ``tradebrain_bse`` profile.
 
-Phase 1 deliberately stops at the policy boundary. This module does not patch,
-wrap, or register any existing Vibe-Trading tool, broker, backtest engine, API
-route, CLI command, or frontend component. Therefore normal Vibe behavior stays
-unchanged unless a future integration point explicitly calls
-:func:`get_active_tradebrain_policy` and enforces the returned policy.
-
-The hard values here come from the TradeBrain/BSE master specification and are
-not learnable parameters. Future backtesting may challenge soft strategy inputs,
-but it must not silently rewrite these boundaries.
+The profile is advisory-only.  Hard owner boundaries are explicit and are not
+learnable parameters.  The target trader is a resident individual; broker
+credentials used only for data do not alter this policy.
 """
 
 from __future__ import annotations
@@ -24,8 +18,6 @@ TRADEBRAIN_BSE_PROFILE = "tradebrain_bse"
 
 @dataclass(frozen=True)
 class SecurityTarget:
-    """Human-readable primary security target for the BSE profile."""
-
     company_name: str
     exchange: str
     symbol: str
@@ -38,43 +30,35 @@ class SecurityTarget:
 
 @dataclass(frozen=True)
 class DayPolicy:
-    """Immutable DAY-mode boundaries."""
-
     long_allowed: bool
     short_allowed: bool
     flat_by: time
     timezone: str
+    fresh_entry_cutoff: time = time(hour=15, minute=10)
 
 
 @dataclass(frozen=True)
 class SwingPolicy:
-    """Immutable SWING/POSITION boundaries for the current architecture."""
-
     long_allowed: bool
     short_allowed: bool
     funding_mechanism: str
+    mtf_required: bool = False
 
 
 @dataclass(frozen=True)
 class AIPolicy:
-    """Authority boundary for LLM/agent input."""
-
     context_allowed: bool
     hard_rule_override_allowed: bool
 
 
 @dataclass(frozen=True)
 class LegacyPolicy:
-    """Retired strategy components that must not re-enter active logic."""
-
     l1_l2_l3_enabled: bool
     rescue_averaging_enabled: bool
 
 
 @dataclass(frozen=True)
 class TradeBrainBSEPolicy:
-    """Phase-1 policy envelope for future BSE-specific integration points."""
-
     profile_name: str
     advisory_only: bool
     auto_execution: bool
@@ -84,6 +68,7 @@ class TradeBrainBSEPolicy:
     swing: SwingPolicy
     ai: AIPolicy
     legacy: LegacyPolicy
+    target_trader_persona: str = "resident_individual"
 
 
 _POLICY = TradeBrainBSEPolicy(
@@ -102,11 +87,13 @@ _POLICY = TradeBrainBSEPolicy(
         short_allowed=True,
         flat_by=time(hour=15, minute=15),
         timezone="Asia/Kolkata",
+        fresh_entry_cutoff=time(hour=15, minute=10),
     ),
     swing=SwingPolicy(
         long_allowed=True,
         short_allowed=False,
-        funding_mechanism="MTF",
+        funding_mechanism="CASH_DELIVERY_OR_OPTIONAL_MTF",
+        mtf_required=False,
     ),
     ai=AIPolicy(
         context_allowed=True,
@@ -120,20 +107,10 @@ _POLICY = TradeBrainBSEPolicy(
 
 
 def tradebrain_bse_policy() -> TradeBrainBSEPolicy:
-    """Return the immutable BSE policy contract."""
-
     return _POLICY
 
 
 def active_profile_name(environ: Mapping[str, str] | None = None) -> str | None:
-    """Resolve the opt-in TradeBrain profile without changing upstream defaults.
-
-    Only the exact value ``tradebrain_bse`` activates the profile. Missing,
-    blank, unknown, or misspelled values all remain disabled, which preserves
-    normal Vibe-Trading behavior and fails closed with respect to custom policy
-    activation.
-    """
-
     source = os.environ if environ is None else environ
     value = str(source.get(TRADEBRAIN_PROFILE_ENV, "")).strip().lower()
     if value == TRADEBRAIN_BSE_PROFILE:
@@ -144,12 +121,6 @@ def active_profile_name(environ: Mapping[str, str] | None = None) -> str | None:
 def get_active_tradebrain_policy(
     environ: Mapping[str, str] | None = None,
 ) -> TradeBrainBSEPolicy | None:
-    """Return the BSE policy only when explicitly opted in.
-
-    Phase 1 intentionally provides no automatic wiring into existing Vibe code.
-    Future phases must call this function at narrow, tested integration points.
-    """
-
     if active_profile_name(environ) == TRADEBRAIN_BSE_PROFILE:
         return _POLICY
     return None

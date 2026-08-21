@@ -36,10 +36,11 @@ def test_exact_opt_in_enables_tradebrain_bse() -> None:
     assert get_active_tradebrain_policy(environ) is tradebrain_bse_policy()
 
 
-def test_bse_profile_is_advisory_only_and_auto_execution_off() -> None:
+def test_bse_profile_is_resident_advisory_only_and_auto_execution_off() -> None:
     policy = tradebrain_bse_policy()
     assert policy.advisory_only is True
     assert policy.auto_execution is False
+    assert policy.target_trader_persona == "resident_individual"
 
 
 def test_bse_profile_targets_bse_ltd_on_nse() -> None:
@@ -53,6 +54,7 @@ def test_day_hard_boundaries() -> None:
     day = tradebrain_bse_policy().day
     assert day.long_allowed is True
     assert day.short_allowed is True
+    assert day.fresh_entry_cutoff == time(15, 10)
     assert day.flat_by == time(15, 15)
     assert day.timezone == "Asia/Kolkata"
 
@@ -61,7 +63,8 @@ def test_swing_hard_boundaries() -> None:
     swing = tradebrain_bse_policy().swing
     assert swing.long_allowed is True
     assert swing.short_allowed is False
-    assert swing.funding_mechanism == "MTF"
+    assert swing.mtf_required is False
+    assert swing.funding_mechanism == "CASH_DELIVERY_OR_OPTIONAL_MTF"
 
 
 def test_ai_cannot_override_hard_rules() -> None:
