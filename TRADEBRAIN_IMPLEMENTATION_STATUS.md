@@ -4,84 +4,90 @@ Persistent resume point. Read with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-
 
 ## Current state
 
-- Current phase: **Phase 8 — DAY/SWING advisory transaction-cost economics**
-- Working branch: `tradebrain-phase8-advisory-costs`
-- Parent: `tradebrain-phase7-controlled-learning`
+- Current phase: **Phase 9 — point-in-time relative-market context**
+- Working branch: `tradebrain-phase9-relative-market`
+- Parent: `tradebrain-phase8-advisory-costs`
+- Phase 8 parent commit: `55f7602b609d6424d81e1d032091be827582c651`
 - Upstream baseline: `HKUDS/Vibe-Trading@1907e47d31d72f34bc2c87e0e5c4f750c83da59d`
 - Vibe version: `0.1.14`
-- TradeBrain trading/broker/frontend behavior changed: **NO**
+- TradeBrain trading/broker behavior changed: **NO**
+- Target trader persona: **resident individual**
+- NRI Zerodha/Kite credential, if used: **read-only market data only**; cannot select NRI fees/restrictions/advice rules
 - Phase 7 targeted tests: **37 passed**
 - Phase 7 Desktop Windows GitHub Actions: **PASSED**, run `32517034012`
-- Revised Phase 8 DAY/SWING targeted tests: **15 passed**
-- Resident-persona/data-credential separation tests: **3 passed**
-- Phase 8 total targeted tests: **18 passed**
-- Combined Phase 7 + Phase 8 targeted validation: **55 passed**
-- Phase 8 repository CI: **pending until the committed PR workflow is observed**
+- Phase 8 targeted tests: **18 passed**
+- Phase 7 + Phase 8 combined isolated validation: **55 passed**
+- Phase 8 Desktop Windows GitHub Actions: **PASSED**, run `32524596840`
+- Phase 9 targeted isolated tests: **18 passed**
+- Phase 9 repository CI: **pending until committed PR workflow is observed**
 
-## Completed through Phase 7
+## Completed through Phase 8
 
 - [x] Additive `tradebrain_bse` advisory-only profile.
 - [x] Canonical Company/Issuer -> ISIN -> exchange-listing identity and strict resolution.
 - [x] Verified provenance, point-in-time identity hydration, market-data and official intelligence contracts.
 - [x] Single-snapshot no-lookahead market structure and provisional Crash Guard.
-- [x] Deterministic plan/outcome replay with TP/SL ambiguity handling, MAE/MFE and DAY 15:15 boundary.
-- [x] Controlled Champion/Challenger research governance with OOS/walk-forward gates and no automatic promotion.
+- [x] Deterministic TP/SL historical replay with MAE/MFE, ambiguity handling and DAY 15:15 boundary.
+- [x] Controlled Champion/Challenger governance with OOS/walk-forward and no automatic promotion.
+- [x] Resident DAY LONG/SHORT and SWING LONG-only transaction-cost economics.
+- [x] Resident-persona boundary separated from optional NRI read-only data credentials.
+- [x] Current fee snapshots are source-dated and cannot be silently backfilled into older history.
+- [x] Cost overlays preserve immutable Phase-6 truth and exact lineage.
 
-## Completed in revised Phase 8
+## Completed in Phase 9
 
-- [x] DAY advisory cost path supports LONG and SHORT.
-- [x] SWING advisory cost path remains LONG-only.
-- [x] DAY and same-day SWING exits use intraday charge semantics.
-- [x] Overnight SWING uses delivery charge semantics and DP debit when enabled.
-- [x] Target trader persona is explicitly **resident individual** through canonical `resident_advisory.py`; non-resident fee profiles cannot replace it in the BSE target path.
-- [x] Intraday STT sell-side and stamp-duty buy-side placement modeled for LONG and SHORT.
-- [x] Delivery bilateral STT, buy stamp duty, exchange/SEBI/GST and DP modeled.
-- [x] Slippage is explicit/versioned and reflected in execution prices rather than double-counted as a fee.
-- [x] LONG and DAY SHORT break-even / requested-net-target solvers verify the paise/tick result.
-- [x] Auto-square-off/call-and-trade charge is explicit and only applied when requested.
-- [x] Current built-in Zerodha charge snapshot is source-dated and refuses historical backfill before its first verified date.
-- [x] Immutable `AdviceCostedPlanSnapshot` binds Phase-6 setup SHA to exact position, charge schedule, brokerage profile, and slippage lineage.
-- [x] Only resolved TP-first/SL-first outcomes receive realized net R; ambiguous/neither/data-insufficient paths remain uncosted.
-- [x] Costed Crash cases rebind unchanged Crash labels to the exact costed setup lineage.
-- [x] NRI Zerodha/Kite credentials may be used only as read-only backtest/historical/live market-data authentication; the contract stores no secret and credential account type cannot alter resident brokerage/advice semantics.
-- [x] Revised Phase 8 deliberately does **not** require MTF or account eligibility to produce DAY/SWING advice.
+- [x] Exact broad-market benchmark descriptor for NIFTY 50 (`^NSEI`) added.
+- [x] Benchmark data reuses Vibe's existing `india_equity` loader resolver.
+- [x] Exact benchmark-symbol requirement; no fuzzy/silent index substitution.
+- [x] Same interval required between BSE and benchmark.
+- [x] Same resolved market-data source required by default; cross-source comparison requires explicit opt-out.
+- [x] Equivalent timezone offsets normalize to the same UTC instant before alignment.
+- [x] BSE/benchmark bars are filtered to `timestamp <= as_of`.
+- [x] Point-in-time prefix SHA-256 values prevent future appended bars from rewriting earlier context lineage.
+- [x] Exact aligned-timestamp SHA-256 recorded.
+- [x] Stale/unknown BSE or benchmark freshness fails closed.
+- [x] Minimum aligned-bar and alignment-ratio requirements fail closed.
+- [x] Relative measurements include 1-bar/short/medium returns, benchmark drawdown, correlation and beta.
+- [x] Phase-9 config is explicitly provisional (`learned=False`).
+- [x] Relative-market context cannot generate trade direction/verdict or override Crash Guard/hard rules.
+- [x] Research feature payload carries context lineage for later Champion/Challenger experiments.
+- [x] Future-shock regression proves bars after an earlier `as_of` cannot alter earlier relative measurements.
+- [x] Phase 9 targeted isolated validation: **18 passed**.
 
 ## Explicitly deferred / do not claim
 
-- [ ] MTF funding economics as an active Phase-8 requirement. User scope is DAY/SWING advice first; MTF can be added later as an optional overlay if needed.
-- [ ] Account/product eligibility as a market-advice gate.
-- [ ] Real BSE historical cost-complete replay/calibration statistics.
-- [ ] Historical broker/statutory charge schedules before the current verified snapshot boundary.
-- [ ] Fill-level multi-order reconstruction.
-- [ ] Income-tax/TDS modeling inside transaction-cost R.
-- [ ] Candidate generation.
-- [ ] Relative-market/index stress context.
-- [ ] Authoritative hard-rule arbiter.
-- [ ] Final BSE guidance layer.
-- [ ] Kite integration or broker-write path.
-- [ ] TradeBrain live execution.
+- [ ] Real BSE historical calibration proving relative-market features add value.
+- [ ] Any learned/promoted relative-market threshold or weight.
+- [ ] Automatic corporate-event network ingestion/persistence.
+- [ ] Historical fee schedules before the verified Phase-8 boundary.
+- [ ] Exchange-calendar-aware SWING completeness across special sessions/holidays.
+- [ ] Authoritative final hard-rule arbiter.
+- [ ] Final BSE guidance composition.
+- [ ] BSE Command Center UI.
+- [ ] Kite integration as a production data adapter.
+- [ ] Broker/order write path or live execution.
+- [ ] MTF as a requirement for SWING advice.
 
 ## Hard boundaries
 
 - `main` is not the development target for unreviewed TradeBrain work.
 - Preserve upstream Vibe capabilities; no big-bang rewrite.
 - Never commit credentials/API keys/broker tokens/private local databases.
-- Historical evaluation cannot see bars/events or fee schedules unavailable at its decision `as_of`.
-- Current fee snapshots must not be silently backfilled into older history.
-- DAY hard flat remains 15:15 IST.
-- DAY may advise LONG or SHORT; SWING/POSITION remains LONG-only.
-- Data API credential account type is separate from target trader persona: an NRI read-only data login must never select NRI fees or restrictions for the resident trader.
-- MTF/account restrictions, if modeled later, apply to execution/funding overlays and must not erase otherwise-valid DAY/SWING market advice.
-- Crash Guard is a risk gate, never an automatic SHORT generator.
-- Hard rules cannot be modified by learning.
-- `tradebrain_bse` remains advisory-only and cannot place live orders.
+- Target trader is resident individual; NRI data-login metadata cannot alter resident brokerage/advice semantics.
+- DAY may advise LONG or SHORT and remains hard-flat by 15:15 IST.
+- SWING/POSITION remains LONG-only.
+- Historical evaluation cannot see bars/events/features unavailable at its `as_of`.
+- Relative-market context is soft/research context until controlled evaluation proves value.
+- Crash Guard remains a risk gate and never auto-creates SHORT.
+- Learning cannot modify hard rules or auto-promote a challenger.
+- `tradebrain_bse` remains advisory-only.
 
 ## Next intended phase
 
-**Phase 9 — BSE relative-market context**
+**Phase 10 — BSE Command Center / final advisory presentation foundation**
 
-Add point-in-time broad-market/index context only where it measurably improves BSE decisions, preserve exact source/timestamp/hash alignment, and route any candidate features through the existing controlled-learning evaluation path.
+Build the presentation/composition layer around already-verified identity, market data, intelligence, structure, Crash Guard, historical outcomes, costs and relative context. Keep final decision readiness fail-closed until the authoritative hard-rule arbiter is explicitly implemented.
 
 ## Resume instruction
 
-Inspect current branch/commit/PR/CI first. Then read the master spec, phase notes, this status file, and the actual `agent/src/tradebrain/` diff. Do not reintroduce MTF as a prerequisite for DAY/SWING advice unless the owner explicitly changes scope.
+Inspect current branch/commit/PR/CI first. Then read the master spec, phase notes, this status file, and actual TradeBrain diff. Do not let index context, NRI data credentials, AI, or UI bypass resident policy/hard-rule boundaries.
