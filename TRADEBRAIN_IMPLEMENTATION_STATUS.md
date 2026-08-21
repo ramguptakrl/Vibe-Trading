@@ -13,7 +13,8 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - Trading behavior changed by TradeBrain so far: **NO — profile is not wired into existing Vibe runtime paths yet**
 - Broker/execution behavior changed by TradeBrain so far: **NO**
 - Frontend behavior changed by TradeBrain so far: **NO**
-- Phase 1 targeted tests: **AUTHORED; EXECUTION/CI RESULT PENDING**
+- Phase 1 targeted tests: **10 PASSED in an isolated Python validation using the exact committed Phase 1 module/test contents**
+- Full upstream Vibe CI: **PENDING / NOT CLAIMED PASS**
 
 ## Completed
 
@@ -30,12 +31,14 @@ This file is the short, persistent resume point for humans and coding agents. Re
 - [x] Explicit opt-in resolver uses `VIBE_TRADING_PROFILE=tradebrain_bse`; absent/unknown values keep the custom profile OFF.
 - [x] Policy contract encodes advisory-only, auto-execution OFF, BSE Ltd / `NSE:BSE`, DAY 15:15 IST cutoff, DAY long/short allowed, SWING long-only + MTF funding, AI no-hard-rule override, and retired L1/L2/L3/rescue averaging disabled.
 - [x] Phase 1 regression tests authored for default-OFF behavior, exact opt-in, immutable policy values and hard boundaries.
+- [x] Targeted Phase 1 contract tests executed in an isolated Python environment: **10 passed**.
+- [x] Draft PR #1 opened from `tradebrain-phase1-profile` to `tradebrain-phase0-baseline` for review/check visibility; it must not be merged automatically.
 
 ## Validation still pending
 
-- [ ] Obtain a real baseline/full test or CI run; do not label upstream tests PASS until actually observed.
-- [ ] Run targeted `agent/tests/test_tradebrain_bse_profile.py` and record the result.
-- [ ] Confirm package/import checks in CI or a clean local environment.
+- [ ] Obtain a real baseline/full upstream test or CI run; do not label upstream tests PASS until actually observed.
+- [ ] Confirm the full repository package/import context through upstream CI or a clean checkout of the complete repository.
+- [ ] The upstream `CI` workflow targets pull requests to `main`, so the Phase 1 -> Phase 0 safety PR does not trigger that full workflow by design.
 - [ ] Do not claim the profile structurally blocks broker writes yet: Phase 1 defines the policy boundary but deliberately does not wire it into Vibe's existing live/order registry.
 
 ## Hard boundaries — do not silently change
@@ -60,7 +63,7 @@ This file is the short, persistent resume point for humans and coding agents. Re
 
 Goal: reuse Vibe's platform while adding TradeBrain's stronger Indian security/entity identity concepts (company -> canonical security/ISIN -> exchange listings) and provenance boundaries without copying the old application wholesale.
 
-Before Phase 2 changes production paths, validate the Phase 1 tests and choose narrow interfaces for identity lookup and evidence provenance. Do not jump directly into Kite, indicators, Crash Guard porting, UI redesign, TradeBrain database migration, or live execution.
+Before Phase 2 changes production paths, choose narrow interfaces for identity lookup and evidence provenance. Do not jump directly into Kite, indicators, Crash Guard porting, UI redesign, TradeBrain database migration, or live execution.
 
 ## Resume instruction
 
@@ -71,5 +74,6 @@ For a new chat/agent:
 3. Read `TRADEBRAIN_PHASE0_BASELINE.md`.
 4. Read this file.
 5. Inspect `agent/src/tradebrain/profile.py` and `agent/tests/test_tradebrain_bse_profile.py`.
-6. Verify what is actually implemented and what has actually passed tests before claiming a feature exists.
-7. Continue from the unchecked validation items and the next phase, preserving hard boundaries.
+6. Inspect draft PR #1 and any check results without assuming mergeability means correctness.
+7. Verify what is actually implemented and what has actually passed tests before claiming a feature exists.
+8. Continue from the unchecked validation items and the next phase, preserving hard boundaries.
