@@ -13,7 +13,7 @@ from src.tradebrain.replay import (
     CrashReplayConfusion, CrashReplayLabel, CrashReplayLabelConfig,
     evaluate_crash_replay_case, summarize_crash_replay,
 )
-from tradebrain_phase6_fixtures import (
+from .tradebrain_phase6_fixtures import (
     IST, future_bars, make_bar, make_phase5, make_setup, replay_for, stress_rows,
 )
 
