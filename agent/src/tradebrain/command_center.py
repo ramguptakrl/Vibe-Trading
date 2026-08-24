@@ -13,6 +13,7 @@ from typing import Any
 from src.tradebrain.final_guidance import FinalGuidance
 from src.tradebrain.journal import TradeBrainJournalStore
 from src.tradebrain.kite_readonly import KiteReadOnlyAdapter
+from src.tradebrain.operations_plan import build_operations_plan
 from src.tradebrain.profile import tradebrain_bse_policy
 from src.tradebrain.session_modes import OperatingState
 
@@ -27,6 +28,7 @@ class CommandCenterSnapshot:
     advisory_only: bool
     auto_execution: bool
     operating: dict[str, Any]
+    work_plan: dict[str, Any]
     guidance: dict[str, Any] | None
     manual_trade_count: int
     open_manual_trade_count: int
@@ -73,6 +75,7 @@ def build_command_center_snapshot(
         advisory_only=policy.advisory_only,
         auto_execution=policy.auto_execution,
         operating=asdict(operating),
+        work_plan=asdict(build_operations_plan(operating)),
         guidance=_serialize_guidance(guidance),
         manual_trade_count=len(manual),
         open_manual_trade_count=sum(item.status.value == "open" for item in manual),
