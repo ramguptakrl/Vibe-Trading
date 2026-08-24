@@ -46,7 +46,15 @@ type Center = {
     broker_order_write_allowed: boolean;
   };
   external_gates: string[];
-  calendar_source: string;
+  calendar: {
+    local_date: string;
+    is_trading_day: boolean;
+    verified: boolean;
+    source_name: string | null;
+    source_url: string | null;
+    snapshot_sha256: string | null;
+    blocker: string | null;
+  };
 };
 
 type ManualTrade = {
@@ -200,6 +208,7 @@ export function BseCommandCenter() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Flag ok={Boolean(center?.operating.permissions.observe_market)}>market observe</Flag>
             <Flag ok={Boolean(center?.operating.permissions.fresh_day_entry_allowed)}>fresh DAY</Flag>
+            <Flag ok={Boolean(center?.calendar.verified)}>calendar verified</Flag>
           </div>
         </Card>
 
@@ -247,7 +256,11 @@ export function BseCommandCenter() {
               ))
             )}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Calendar source: {center?.calendar_source || "—"}</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Calendar: {center?.calendar.verified
+              ? center.calendar.source_name || "verified NSE calendar"
+              : center?.calendar.blocker?.replaceAll("_", " ") || "not verified"}
+          </p>
         </Card>
 
         <Card title="Hard safety boundary">
@@ -279,14 +292,14 @@ export function BseCommandCenter() {
             ))}
             <label className="space-y-1 text-xs text-muted-foreground">
               <span>Mode</span>
-              <select value={form.mode} onChange={(event) => setForm((old) => ({ ...old, mode: event.target.value }))} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground">
+              <select value={form.mode} onChange={(event) => setForm((old) => ({ ...old, mode: event.target.value, direction: event.target.value === "swing" ? "long" : old.direction }))} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground">
                 <option value="day">DAY</option><option value="swing">SWING</option>
               </select>
             </label>
             <label className="space-y-1 text-xs text-muted-foreground">
               <span>Direction</span>
               <select value={form.direction} onChange={(event) => setForm((old) => ({ ...old, direction: event.target.value }))} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground">
-                <option value="long">LONG</option><option value="short">SHORT</option>
+                <option value="long">LONG</option><option value="short" disabled={form.mode === "swing"}>SHORT</option>
               </select>
             </label>
             <label className="space-y-1 text-xs text-muted-foreground md:col-span-2">
