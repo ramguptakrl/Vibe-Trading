@@ -1,7 +1,8 @@
 """Read-only Zerodha Kite adapter boundary for TradeBrain BSE.
 
-The adapter intentionally exposes only identity, quote, historical-candle and
-WebSocket construction helpers. There are no order/position mutation methods.
+The adapter intentionally exposes only authentication helpers, exact identity,
+quote, historical-candle and market-stream construction. There are no
+order/position mutation methods.
 """
 
 from __future__ import annotations
@@ -63,24 +64,30 @@ class KiteReadOnlyAdapter:
             affects_target_persona=False,
         )
         try:
-            from kiteconnect import KiteConnect  # type: ignore
+            from kiteconnect import KiteConnect, KiteTicker  # type: ignore
         except ImportError:
             self._kite_cls = None
+            self._ticker_cls = None
         else:
             self._kite_cls = KiteConnect
+            self._ticker_cls = KiteTicker
         self._client: Any | None = None
+        self._bound_access_token: str | None = None
 
     @property
     def readiness(self) -> KiteReadiness:
-        sdk = self._kite_cls is not None
+        sdk = self._kite_cls is not None and self._ticker_cls is not None
         key = bool(self.config.api_key)
-        token = bool(self.config.access_token)
+        token = bool(self._effective_access_token())
         return KiteReadiness(
             sdk_available=sdk,
             api_key_configured=key,
             access_token_configured=token,
             authenticated_read_ready=sdk and key and token,
         )
+
+    def _effective_access_token(self) -> str | None:
+        return self._bound_access_token or self.config.access_token
 
     def login_url(self) -> str:
         if self._kite_cls is None:
@@ -97,6 +104,7 @@ class KiteReadOnlyAdapter:
         token = str(access_token or "").strip()
         if not token:
             raise ValueError("access_token is required")
+        self._bound_access_token = token
         self._client = self._kite_cls(api_key=self.config.api_key)
         self._client.set_access_token(token)
 
@@ -105,11 +113,21 @@ class KiteReadOnlyAdapter:
             return self._client
         if self._kite_cls is None:
             raise KiteSDKUnavailable("Install the optional Kite SDK: pip install 'kiteconnect>=5.2.1,<6'")
-        if not self.config.api_key or not self.config.access_token:
+        token = self._effective_access_token()
+        if not self.config.api_key or not token:
             raise RuntimeError("Kite read-only data access is not authenticated")
         self._client = self._kite_cls(api_key=self.config.api_key)
-        self._client.set_access_token(self.config.access_token)
+        self._client.set_access_token(token)
         return self._client
+
+    def build_market_stream(self):
+        """Build a KiteTicker WebSocket client for read-only market ticks."""
+        if self._ticker_cls is None:
+            raise KiteSDKUnavailable("Install the optional Kite SDK: pip install 'kiteconnect>=5.2.1,<6'")
+        token = self._effective_access_token()
+        if not self.config.api_key or not token:
+            raise RuntimeError("Kite read-only market stream is not authenticated")
+        return self._ticker_cls(self.config.api_key, token)
 
     def resolve_bse_ltd_instrument(self) -> dict[str, Any]:
         """Resolve exact BSE Ltd equity by NSE symbol and ISIN where present."""
