@@ -313,6 +313,10 @@ from src.api.scheduled_routes import (  # noqa: E402, F401
     _scheduled_research_scheduler_enabled,
 )
 
+# --- TradeBrain BSE operational surface ---
+from src.api.tradebrain_routes import register_tradebrain_routes  # noqa: E402
+register_tradebrain_routes(app)
+
 
 # ============================================================================
 # Main Entry Point
