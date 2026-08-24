@@ -6,7 +6,7 @@ import pytest
 from src.tradebrain.historical_outcomes import (
     OutcomeState, OutcomeValidationError, build_replay_bar_batch, evaluate_plan_outcome,
 )
-from tradebrain_phase6_fixtures import IST, future_bars, make_bar, make_phase5, make_setup, replay_for
+from .tradebrain_phase6_fixtures import IST, future_bars, make_bar, make_phase5, make_setup, replay_for
 
 def test_decision_time_completed_bar_is_not_reused_as_future_result():
     setup = make_setup()
