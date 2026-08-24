@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from enum import Enum
 import sys as _sys
 from typing import Any, Awaitable, Callable
-from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -15,6 +14,7 @@ from pydantic import BaseModel, Field
 from src.tradebrain.command_center import build_command_center_snapshot
 from src.tradebrain.journal import TradeBrainJournalStore
 from src.tradebrain.kite_readonly import KiteReadOnlyAdapter
+from src.tradebrain.market_calendar import resolve_trading_day
 from src.tradebrain.session_modes import resolve_operating_state
 
 __all__ = ["register_tradebrain_routes"]
@@ -41,15 +41,9 @@ def _wire(value: Any) -> Any:
     return value
 
 
-def _weekday_trading_day(now: datetime) -> bool:
-    # Runtime fallback only. Command Center exposes the calendar source so a
-    # weekday is never mistaken for an NSE-holiday-verified session.
-    return now.astimezone(ZoneInfo("Asia/Kolkata")).weekday() < 5
-
-
 class CreateManualTradeRequest(BaseModel):
     advisory_id: str = Field(..., min_length=1, max_length=256)
-    guidance_sha256: str = Field(..., min_length=1, max_length=128)
+    guidance_sha256: str = Field(..., min_length=64, max_length=64)
     mode: str = Field(..., min_length=1, max_length=32)
     direction: str = Field(..., min_length=1, max_length=16)
     planned_entry: float = Field(..., gt=0)
@@ -72,7 +66,7 @@ class CloseManualTradeRequest(BaseModel):
 
 class CreateShadowAdvisoryRequest(BaseModel):
     advisory_id: str = Field(..., min_length=1, max_length=256)
-    guidance_sha256: str = Field(..., min_length=1, max_length=128)
+    guidance_sha256: str = Field(..., min_length=64, max_length=64)
     mode: str = Field(..., min_length=1, max_length=32)
     direction: str = Field(..., min_length=1, max_length=16)
     entry: float = Field(..., gt=0)
@@ -103,26 +97,29 @@ def register_tradebrain_routes(app: FastAPI, require_auth: AuthDep | None = None
     @app.get("/tradebrain/bse/operating-mode", dependencies=dependencies)
     async def tradebrain_operating_mode() -> dict[str, Any]:
         now = datetime.now(timezone.utc)
-        state = resolve_operating_state(now, is_trading_day=_weekday_trading_day(now))
+        calendar = resolve_trading_day(now)
+        state = resolve_operating_state(now, is_trading_day=calendar.is_trading_day and calendar.verified)
         payload = _wire(state)
-        payload["calendar_source"] = "weekday_fallback_not_nse_holiday_verified"
+        payload["calendar"] = _wire(calendar)
         return payload
 
     @app.get("/tradebrain/bse/command-center", dependencies=dependencies)
     async def tradebrain_command_center() -> dict[str, Any]:
         now = datetime.now(timezone.utc)
-        state = resolve_operating_state(now, is_trading_day=_weekday_trading_day(now))
+        calendar = resolve_trading_day(now)
+        state = resolve_operating_state(now, is_trading_day=calendar.is_trading_day and calendar.verified)
         snapshot = build_command_center_snapshot(
             state,
             journal=_get_journal(),
             kite=KiteReadOnlyAdapter(),
         )
         payload = _wire(snapshot)
-        payload["calendar_source"] = "weekday_fallback_not_nse_holiday_verified"
-        payload["external_gates"] = list(payload["external_gates"]) + [
-            "verified_nse_exchange_calendar_not_bound",
-            "real_historical_backfill_not_verified_by_this_endpoint",
-        ]
+        payload["calendar"] = _wire(calendar)
+        gates = list(payload["external_gates"])
+        if calendar.blocker:
+            gates.append(calendar.blocker)
+        gates.append("real_historical_backfill_not_verified_by_this_endpoint")
+        payload["external_gates"] = list(dict.fromkeys(gates))
         return payload
 
     @app.get("/tradebrain/bse/kite/status", dependencies=dependencies)
