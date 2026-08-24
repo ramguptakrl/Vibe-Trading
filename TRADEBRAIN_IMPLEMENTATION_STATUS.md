@@ -1,30 +1,25 @@
 # TradeBrain + BSE Integration — Implementation Status
 
-Persistent resume point. Read with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-21.txt`, phase notes, and the actual branch diff before changing code.
+Persistent resume point. Read with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-21.txt`, phase notes, `TRADEBRAIN_PHASE11_OPERATIONS.md`, and the actual branch/PR before changing code.
 
 ## Current state
 
-- Current phase: **Phase 10 — hard-rule arbiter + final advisory composition**
-- Working branch: `tradebrain-phase10-final-guidance`
-- Parent: `tradebrain-phase9-relative-market`
-- Parent commit: `fe4687a227b95d7db92b3723c4d5ae292910a8cc`
-- Upstream baseline: `HKUDS/Vibe-Trading@1907e47d31d72f34bc2c87e0e5c4f750c83da59d`
+- Current phase: **Phase 11 — operational/presentation completion**
+- Working branch: `codex/complete-vibe-trading`
+- Consolidated PR: **#11**, base `main`
+- Upstream Vibe baseline: `HKUDS/Vibe-Trading@1907e47d31d72f34bc2c87e0e5c4f750c83da59d`
 - Vibe version: `0.1.14`
 - Target trader persona: **resident individual**
-- NRI Zerodha/Kite credential, if used: **read-only market-data authentication only**
+- Optional NRI Zerodha/Kite credential: **read-only market-data authentication only**
 - TradeBrain broker/live execution behavior changed: **NO**
-- Phase 7 targeted tests: **37 passed**
-- Phase 7 Desktop Windows CI: **PASSED**, run `32517034012`
-- Phase 8 targeted tests: **18 passed**
-- Phase 8 Desktop Windows CI: **PASSED**, run `32524596840`
-- Phase 9 targeted tests: **18 passed**
-- Phase 9 Desktop Windows CI: **PASSED**, run `32525813721`
-- Updated profile boundary tests: **10 passed**
-- Phase 10 targeted tests: **29 passed**
-- Phase 7 + updated profile + Phase 10 isolated validation: **76 passed**
-- Phase 10 repository CI: **pending until committed PR workflow is observed**
+- TradeBrain advisory-only state: **YES**
+- Automatic challenger promotion: **NO**
+- SWING SHORT: **prohibited**
+- Phase 0–10 backend: implemented
+- Phase 11 operational/UI framework: implemented on the working branch
+- Consolidated PR CI: must be green before integration is called complete
 
-## Completed through Phase 9
+## Implemented backend/core
 
 - [x] Additive advisory-only `tradebrain_bse` profile.
 - [x] Company/issuer -> ISIN -> exchange-listing identity and exact BSE Ltd guard.
@@ -36,47 +31,72 @@ Persistent resume point. Read with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-
 - [x] Resident target persona separated from optional NRI read-only data credentials.
 - [x] Point-in-time NIFTY 50 relative-market context with source/timestamp/prefix hashing.
 - [x] Relative-market features remain research-only until deliberately promoted.
-
-## Completed in Phase 10
-
-- [x] Canonical Swing funding policy corrected to `CASH_DELIVERY_OR_OPTIONAL_MTF`; `mtf_required=False`.
-- [x] DAY fresh-entry cutoff made explicit at **15:10 IST**; hard flat remains **15:15 IST**.
-- [x] `target_trader_persona="resident_individual"` embedded in immutable profile.
-- [x] Authoritative deterministic hard-rule arbiter added.
-- [x] Hard-rule outcomes: ALLOW / BLOCKED / EXIT_REQUIRED / DATA_INSUFFICIENT.
-- [x] Exact identity, advisory-only state, retired-logic state and geometry enforced.
+- [x] Canonical Swing funding policy `CASH_DELIVERY_OR_OPTIONAL_MTF`; `mtf_required=False`.
+- [x] DAY fresh-entry cutoff **15:10 IST**; DAY hard-flat **15:15 IST**.
+- [x] Deterministic hard-rule arbiter with ALLOW / BLOCKED / EXIT_REQUIRED / DATA_INSUFFICIENT.
 - [x] DAY LONG/SHORT policy enforced independently from Crash Guard.
-- [x] SWING SHORT is hard-blocked; SWING LONG remains permitted subject to other rules.
-- [x] Severe Crash Guard blocks DAY/SWING LONG where configured but never creates a SHORT.
-- [x] Structure-derived candidate geometry proposals added; proposal != verdict.
-- [x] Candidate geometry is provisional (`learned=False`) and preserves separate DAY/SWING R:R gates.
-- [x] Net-of-cost Phase-7 extension added for net expectancy/profit-factor/drawdown/coverage.
-- [x] Net challenger comparison requires identical Phase-7 cohort/candidate lineage.
-- [x] Net promotion remains human-review-only and requires complete resolved-trade cost coverage plus measured net benefit.
-- [x] Final plan-specific advisory composer added.
-- [x] Candidate verdict requires hard-rule ALLOW + bound resident costs + real/OOS/walk-forward/no-lookahead/cost-complete history with net expectancy.
-- [x] WAIT / DATA_INSUFFICIENT / BLOCKED_BY_HARD_RULE / EXIT_REQUIRED fail-closed paths implemented.
-- [x] Relative-market context is displayed as research context but cannot change Phase-10 verdict.
-- [x] Confidence is categorical; no fake precision percentage.
-- [x] Final guidance remains `advisory_only=True`, `auto_execution=False` and hash-addressed.
-- [x] Phase 10 exact isolated validation: **29 passed** plus **10** updated profile tests and **37** Phase-7 regressions = **76 passed**.
+- [x] SWING SHORT hard-blocked.
+- [x] Crash Guard acts as a risk gate and cannot create a SHORT signal.
+- [x] Structure-derived candidate geometry proposals remain proposals, not verdicts.
+- [x] Net-of-cost historical evidence and promotion comparison gates.
+- [x] Final plan-specific advisory composer.
+- [x] Final candidate verdict requires hard-rule ALLOW + resident costs + real/OOS/walk-forward/no-lookahead/cost-complete historical reliability.
+- [x] WAIT / DATA_INSUFFICIENT / BLOCKED_BY_HARD_RULE / EXIT_REQUIRED fail-closed paths.
+- [x] Confidence remains categorical; no fake precision percentage.
+- [x] Final guidance remains hash-addressed, advisory-only and non-executing.
 
-## Explicitly deferred / do not claim
+## Implemented Phase 11 operational layer
 
+- [x] BSE Command Center React route at `/tradebrain/bse`.
+- [x] Command Center renders backend state and does not invent a verdict.
+- [x] Authenticated TradeBrain BSE FastAPI routes.
+- [x] Manual `I took this trade` journal with original advisory id + guidance SHA-256 binding.
+- [x] Manual trade close workflow with actual entry/exit, quantity, costs, outcome and realized P&L.
+- [x] Live-shadow advisory journal and resolution workflow.
+- [x] Runtime journal storage outside the Git repository.
+- [x] Manual/shadow journal rejects malformed hashes, invalid geometry and SWING SHORT.
+- [x] Deterministic MARKET_ACTIVE / DAY_EXIT_WINDOW / AFTER_MARKET / OFF_HOURS modes.
+- [x] No fresh DAY entry at/after 15:10; DAY exit priority through the 15:15 hard-flat boundary.
+- [x] After-market/off-hours permissions for replay and challenger research.
+- [x] Broker writes, production mutation and automatic promotion disabled in every operating mode.
+- [x] Fail-closed verified NSE exchange-calendar contract; weekdays alone are never treated as proof of an open session.
+- [x] Validation-readiness contract for real history, OOS, walk-forward, no-lookahead, costs, live data and shadow evidence.
+- [x] Optional Zerodha Kite **read-only** adapter boundary.
+- [x] Kite exact `NSE:BSE` resolution with BSE Ltd ISIN guard where the provider supplies ISIN.
+- [x] Kite read-only quote, historical-candle and market-WebSocket helpers.
+- [x] Kite adapter exposes no order/position/GTT mutation methods.
+- [x] Kite API key/token status is represented as booleans only; secrets are not returned by the Command Center API.
+- [x] Phase 11 operator/setup documentation.
+- [x] Phase 11 safety/persistence tests added.
+
+## Runtime/evidence gates — cannot be honestly completed in source code alone
+
+These are not missing architecture. They remain blocked until their real external inputs exist and pass validation.
+
+- [ ] Install/use the optional Kite SDK in the production runtime.
+- [ ] Supply real `KITE_API_KEY` and current `KITE_ACCESS_TOKEN` outside Git.
+- [ ] Supply/refresh a source-audited current NSE trading-calendar snapshot.
+- [ ] Perform real BSE Ltd historical backfill from the selected production source.
+- [ ] Run the historical data-integrity audit on the real backfill.
+- [ ] Produce real cost-complete OOS/walk-forward/no-lookahead calibration evidence.
+- [ ] Collect live read-only shadow observations across real market sessions.
+- [ ] Review empirical Champion/Challenger evidence manually before any promotion.
+- [ ] Merge PR #11 into `main` only after review and green CI.
+
+## Explicitly not claimed / not enabled
+
+- [ ] Proven profitability.
+- [ ] Learned/final BSE thresholds where evidence is still provisional.
 - [ ] Automatic selection/ranking of one proposal among multiple valid plan geometries.
-- [ ] Real BSE cost-complete OOS/walk-forward calibration results proving any current provisional thresholds.
 - [ ] Relative-market features as promoted decision authority.
-- [ ] Production Kite historical/live adapter.
+- [ ] Broker/order writes or automated live execution.
+- [ ] Automatic challenger promotion.
 - [ ] API key/token storage in Git.
-- [ ] BSE Command Center/API presentation layer.
-- [ ] Broker/order writes or live execution.
-- [ ] Generic Vibe order-registry structural blocking by the TradeBrain profile.
-- [ ] `main` integration/merge.
+- [ ] AI/UI/history override of hard rules.
 
 ## Hard boundaries
 
-- `main` remains untouched by unreviewed TradeBrain work.
-- Target trader is resident individual; NRI data credential class cannot alter resident economics/policy.
+- Target trader is resident individual; optional NRI data credentials cannot alter resident economics/policy.
 - DAY LONG/SHORT permitted only inside hard-rule boundaries; no fresh DAY entry at/after 15:10 IST; flat by 15:15 IST.
 - SWING is LONG-only. MTF is optional, not required.
 - Every candidate requires valid entry/TP/SL geometry.
@@ -85,13 +105,8 @@ Persistent resume point. Read with `TRADEBRAIN_VIBE_REFRAME_MASTER_SPEC_2026-08-
 - Learning cannot silently modify hard rules or auto-promote a challenger.
 - Final guidance cannot become a candidate verdict without resident cost economics and validated historical reliability.
 - TradeBrain remains advisory-only and cannot place live orders.
-
-## Next intended phase
-
-**Phase 11 — read-only BSE Command Center / API presentation**
-
-Expose the Phase-10 backend as a presentation contract and integrate a BSE-specific read-only view into Vibe's existing FastAPI/React application. The UI must render backend verdicts/lineage and must not invent signals, place orders, or bypass the hard-rule arbiter.
+- Missing/invalid/out-of-range NSE calendar evidence fails closed instead of guessing a live session.
 
 ## Resume instruction
 
-Inspect branch/commit/PR/CI first. Then read master spec, phase notes, status and actual diff. Continue from the latest green phase. Do not reintroduce MTF as a Swing prerequisite or allow NRI data credentials to alter resident advisory semantics.
+Inspect PR #11, its latest head and CI first. Fix all regressions before merge. After green integration, the next work is **runtime evidence acquisition** (Kite read-only authentication, real BSE history/audit, calibration and live shadow collection), not another speculative backend rewrite.
