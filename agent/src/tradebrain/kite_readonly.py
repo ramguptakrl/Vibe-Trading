@@ -8,9 +8,9 @@ order/position mutation methods.
 from __future__ import annotations
 
 from dataclasses import dataclass
-import os
 from typing import Any, Mapping, Sequence
 
+from src.config.kite import get_kite_environment
 from src.tradebrain.resident_advisory import DataCredentialUse, ReadOnlyMarketDataCredential
 
 __all__ = [
@@ -35,11 +35,11 @@ class KiteConfiguration:
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> "KiteConfiguration":
-        source = os.environ if environ is None else environ
+        configured = get_kite_environment(environ)
         return cls(
-            api_key=(source.get("KITE_API_KEY") or "").strip() or None,
-            access_token=(source.get("KITE_ACCESS_TOKEN") or "").strip() or None,
-            account_class=(source.get("KITE_ACCOUNT_CLASS") or "nri_non_pis").strip().lower(),
+            api_key=configured.api_key,
+            access_token=configured.access_token,
+            account_class=configured.account_class,
         )
 
 
