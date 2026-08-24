@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { authHeaders } from "@/lib/apiAuth";
 
 type Center = {
@@ -84,7 +84,7 @@ async function jsonRequest<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-function Flag({ ok, children }: { ok: boolean; children: React.ReactNode }) {
+function Flag({ ok, children }: { ok: boolean; children: ReactNode }) {
   return (
     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${ok ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"}`}>
       {children}
@@ -92,7 +92,7 @@ function Flag({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="rounded-xl border border-border/70 bg-card p-4 shadow-sm">
       <h2 className="mb-3 text-sm font-semibold">{title}</h2>
