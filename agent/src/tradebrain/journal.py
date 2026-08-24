@@ -15,6 +15,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import tempfile
 from threading import RLock
 from typing import Any
@@ -29,6 +30,10 @@ __all__ = [
     "ShadowStatus",
     "TradeBrainJournalStore",
 ]
+
+_SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+_VALID_MODES = frozenset({"day", "swing"})
+_VALID_DIRECTIONS = frozenset({"long", "short"})
 
 
 class ManualTradeStatus(str, Enum):
@@ -56,6 +61,33 @@ def _finite_positive(value: float, name: str, *, allow_zero: bool = False) -> fl
         op = ">= 0" if allow_zero else "> 0"
         raise ValueError(f"{name} must be finite and {op}")
     return number
+
+
+def _normalize_advisory_identity(
+    *,
+    guidance_sha256: str,
+    mode: str,
+    direction: str,
+) -> tuple[str, str, str]:
+    digest = str(guidance_sha256 or "").strip().lower()
+    normalized_mode = str(mode or "").strip().lower()
+    normalized_direction = str(direction or "").strip().lower()
+    if not _SHA256_RE.fullmatch(digest):
+        raise ValueError("guidance_sha256 must be a 64-character hexadecimal SHA-256")
+    if normalized_mode not in _VALID_MODES:
+        raise ValueError("mode must be 'day' or 'swing'")
+    if normalized_direction not in _VALID_DIRECTIONS:
+        raise ValueError("direction must be 'long' or 'short'")
+    if normalized_mode == "swing" and normalized_direction == "short":
+        raise ValueError("TradeBrain BSE does not permit SWING SHORT advisories")
+    return digest, normalized_mode, normalized_direction
+
+
+def _validate_plan_geometry(*, entry: float, target: float, stop: float, direction: str) -> None:
+    if direction == "long" and not (stop < entry < target):
+        raise ValueError("LONG advisory geometry must satisfy stop < entry < target")
+    if direction == "short" and not (target < entry < stop):
+        raise ValueError("SHORT advisory geometry must satisfy target < entry < stop")
 
 
 @dataclass(frozen=True)
@@ -172,23 +204,31 @@ class TradeBrainJournalStore:
         opened_at: str | None = None,
         note: str = "",
     ) -> ManualTradeRecord:
-        for name, value in {
-            "advisory_id": advisory_id,
-            "guidance_sha256": guidance_sha256,
-            "mode": mode,
-            "direction": direction,
-        }.items():
-            if not str(value).strip():
-                raise ValueError(f"{name} is required")
+        if not str(advisory_id or "").strip():
+            raise ValueError("advisory_id is required")
+        digest, normalized_mode, normalized_direction = _normalize_advisory_identity(
+            guidance_sha256=guidance_sha256,
+            mode=mode,
+            direction=direction,
+        )
+        entry = _finite_positive(planned_entry, "planned_entry")
+        target = _finite_positive(planned_target, "planned_target")
+        stop = _finite_positive(planned_stop, "planned_stop")
+        _validate_plan_geometry(
+            entry=entry,
+            target=target,
+            stop=stop,
+            direction=normalized_direction,
+        )
         core: dict[str, Any] = {
             "trade_id": str(uuid4()),
             "advisory_id": advisory_id.strip(),
-            "guidance_sha256": guidance_sha256.strip(),
-            "mode": mode.strip().lower(),
-            "direction": direction.strip().lower(),
-            "planned_entry": _finite_positive(planned_entry, "planned_entry"),
-            "planned_target": _finite_positive(planned_target, "planned_target"),
-            "planned_stop": _finite_positive(planned_stop, "planned_stop"),
+            "guidance_sha256": digest,
+            "mode": normalized_mode,
+            "direction": normalized_direction,
+            "planned_entry": entry,
+            "planned_target": target,
+            "planned_stop": stop,
             "actual_entry": _finite_positive(actual_entry, "actual_entry"),
             "quantity": _finite_positive(quantity, "quantity"),
             "opened_at": opened_at or _now(),
@@ -220,6 +260,12 @@ class TradeBrainJournalStore:
         predicted_outcome: str | None = None,
         closed_at: str | None = None,
     ) -> ManualTradeRecord:
+        reason = str(exit_reason or "").strip()
+        outcome = str(actual_outcome or "").strip()
+        if not reason:
+            raise ValueError("exit_reason is required")
+        if not outcome:
+            raise ValueError("actual_outcome is required")
         with self._lock:
             payload = self._load()
             for index, row in enumerate(payload["manual_trades"]):
@@ -240,9 +286,9 @@ class TradeBrainJournalStore:
                     closed_at=closed_at or _now(),
                     costs=fee,
                     realized_pnl=gross - fee,
-                    exit_reason=str(exit_reason or "").strip(),
+                    exit_reason=reason,
                     predicted_outcome=(str(predicted_outcome).strip() if predicted_outcome is not None else None),
-                    actual_outcome=str(actual_outcome or "").strip(),
+                    actual_outcome=outcome,
                     status=ManualTradeStatus.CLOSED.value,
                 )
                 updated.pop("record_sha256", None)
@@ -265,23 +311,31 @@ class TradeBrainJournalStore:
         advisory_at: str | None = None,
         note: str = "",
     ) -> ShadowAdvisoryRecord:
-        for name, value in {
-            "advisory_id": advisory_id,
-            "guidance_sha256": guidance_sha256,
-            "mode": mode,
-            "direction": direction,
-        }.items():
-            if not str(value).strip():
-                raise ValueError(f"{name} is required")
+        if not str(advisory_id or "").strip():
+            raise ValueError("advisory_id is required")
+        digest, normalized_mode, normalized_direction = _normalize_advisory_identity(
+            guidance_sha256=guidance_sha256,
+            mode=mode,
+            direction=direction,
+        )
+        entry_px = _finite_positive(entry, "entry")
+        target_px = _finite_positive(target, "target")
+        stop_px = _finite_positive(stop, "stop")
+        _validate_plan_geometry(
+            entry=entry_px,
+            target=target_px,
+            stop=stop_px,
+            direction=normalized_direction,
+        )
         core: dict[str, Any] = {
             "shadow_id": str(uuid4()),
             "advisory_id": advisory_id.strip(),
-            "guidance_sha256": guidance_sha256.strip(),
-            "mode": mode.strip().lower(),
-            "direction": direction.strip().lower(),
-            "entry": _finite_positive(entry, "entry"),
-            "target": _finite_positive(target, "target"),
-            "stop": _finite_positive(stop, "stop"),
+            "guidance_sha256": digest,
+            "mode": normalized_mode,
+            "direction": normalized_direction,
+            "entry": entry_px,
+            "target": target_px,
+            "stop": stop_px,
             "advisory_at": advisory_at or _now(),
             "status": ShadowStatus.PENDING.value,
             "resolved_at": None,
