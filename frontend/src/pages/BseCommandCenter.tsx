@@ -92,6 +92,10 @@ async function jsonRequest<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function prettyToken(value: string): string {
+  return value.replace(/_/g, " ");
+}
+
 function Flag({ ok, children }: { ok: boolean; children: ReactNode }) {
   return (
     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${ok ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"}`}>
@@ -203,7 +207,7 @@ export function BseCommandCenter() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card title="Operating mode">
-          <div className="text-lg font-semibold">{center?.operating.mode?.replaceAll("_", " ") || "—"}</div>
+          <div className="text-lg font-semibold">{center?.operating.mode ? prettyToken(center.operating.mode) : "—"}</div>
           <p className="mt-1 text-xs text-muted-foreground">{center?.operating.timezone || "Asia/Kolkata"}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Flag ok={Boolean(center?.operating.permissions.observe_market)}>market observe</Flag>
@@ -252,14 +256,14 @@ export function BseCommandCenter() {
               <p className="text-sm text-emerald-500">No external gates reported.</p>
             ) : (
               center?.external_gates.map((gate) => (
-                <div key={gate} className="rounded-md bg-muted/50 px-3 py-2 text-sm">{gate.replaceAll("_", " ")}</div>
+                <div key={gate} className="rounded-md bg-muted/50 px-3 py-2 text-sm">{prettyToken(gate)}</div>
               ))
             )}
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             Calendar: {center?.calendar.verified
               ? center.calendar.source_name || "verified NSE calendar"
-              : center?.calendar.blocker?.replaceAll("_", " ") || "not verified"}
+              : center?.calendar.blocker ? prettyToken(center.calendar.blocker) : "not verified"}
           </p>
         </Card>
 
