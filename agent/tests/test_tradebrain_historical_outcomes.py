@@ -9,7 +9,7 @@ from src.tradebrain.historical_outcomes import (
 )
 from src.tradebrain.crash_guard import CrashGuardState
 from src.tradebrain.market_data import OHLCVBar
-from tradebrain_phase6_fixtures import IST, future_bars, make_bar, make_phase5, make_setup, replay_for
+from .tradebrain_phase6_fixtures import IST, future_bars, make_bar, make_phase5, make_setup, replay_for
 
 def test_plan_snapshot_is_frozen_and_costs_unknown():
     setup = make_setup()
