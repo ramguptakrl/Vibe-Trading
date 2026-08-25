@@ -1,18 +1,18 @@
 """Immutable policy contract for the opt-in ``tradebrain_bse`` profile.
 
-The profile is advisory-only.  Hard owner boundaries are explicit and are not
-learnable parameters.  The target trader is a resident individual; broker
+The profile is advisory-only. Hard owner boundaries are explicit and are not
+learnable parameters. The target trader is a resident individual; broker
 credentials used only for data do not alter this policy.
 """
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from datetime import time
 from typing import Mapping
 
-TRADEBRAIN_PROFILE_ENV = "VIBE_TRADING_PROFILE"
+from src.config.tradebrain import TRADEBRAIN_PROFILE_ENV, get_tradebrain_profile_value
+
 TRADEBRAIN_BSE_PROFILE = "tradebrain_bse"
 
 
@@ -111,8 +111,7 @@ def tradebrain_bse_policy() -> TradeBrainBSEPolicy:
 
 
 def active_profile_name(environ: Mapping[str, str] | None = None) -> str | None:
-    source = os.environ if environ is None else environ
-    value = str(source.get(TRADEBRAIN_PROFILE_ENV, "")).strip().lower()
+    value = get_tradebrain_profile_value(environ)
     if value == TRADEBRAIN_BSE_PROFILE:
         return TRADEBRAIN_BSE_PROFILE
     return None
