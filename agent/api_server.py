@@ -28,10 +28,6 @@ for _s in ("stdout", "stderr"):
     if callable(_r):
         _r(encoding="utf-8", errors="replace")
 
-# ---------------------------------------------------------------------------
-# Extracted infrastructure — re-exported for route-module and test access
-# ---------------------------------------------------------------------------
-
 from src.api.security import (  # noqa: F401, E402
     _API_KEY,
     _CORS_ORIGINS,
@@ -180,8 +176,6 @@ app.add_middleware(
 app.middleware("http")(_reject_untrusted_loopback_host)
 app.middleware("http")(_spa_html_deep_link_fallback)
 app.middleware("http")(_apply_security_headers)
-
-
 # Route registration + re-exports
 
 # --- Runs ---
@@ -312,6 +306,10 @@ from src.api.scheduled_routes import (  # noqa: E402, F401
     _get_scheduled_research_store,
     _scheduled_research_scheduler_enabled,
 )
+
+# --- TradeBrain BSE operational surface ---
+from src.api.tradebrain_routes import register_tradebrain_routes  # noqa: E402
+register_tradebrain_routes(app)
 
 
 # ============================================================================
