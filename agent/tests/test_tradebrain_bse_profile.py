@@ -63,8 +63,9 @@ def test_swing_hard_boundaries() -> None:
     swing = tradebrain_bse_policy().swing
     assert swing.long_allowed is True
     assert swing.short_allowed is False
+    assert swing.mtf_allowed is False
     assert swing.mtf_required is False
-    assert swing.funding_mechanism == "CASH_DELIVERY_OR_OPTIONAL_MTF"
+    assert swing.funding_mechanism == "CASH_DELIVERY_OWN_FUNDS_ONLY"
 
 
 def test_ai_cannot_override_hard_rules() -> None:
