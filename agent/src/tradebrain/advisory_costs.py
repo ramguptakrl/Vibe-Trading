@@ -1,9 +1,9 @@
-"""Phase-8 advisory equity cost engine for BSE DAY and SWING plans.
+"""Resident advisory equity cost engine for BSE DAY and SWING plans.
 
-This module is deliberately separate from broker execution eligibility.  It can
+This module is deliberately separate from broker execution eligibility. It can
 cost a hypothetical/advisory DAY or SWING plan even when a particular account
-cannot execute the product.  MTF, when used, remains an optional funding overlay
-implemented in :mod:`src.tradebrain.mtf_costs`.
+cannot execute the product. Optional MTF funding is outside this equity cost
+model and, if enabled later, requires separately verified source-dated economics.
 """
 
 from __future__ import annotations
@@ -400,7 +400,6 @@ def _settlement(position: EquityAdvicePosition, entry_at: datetime, exit_at: dat
         if not same_day:
             raise AdviceCostValidationError("DAY advice costs require same-session/same-date exit")
         return AdviceSettlementClass.INTRADAY
-    # A SWING idea closed the same day is charged as intraday by Zerodha; otherwise delivery.
     return AdviceSettlementClass.INTRADAY if same_day else AdviceSettlementClass.DELIVERY
 
 
@@ -459,7 +458,6 @@ def _calc_once(
         exit_stt = _stt_rupee(exit_value * schedule.stt_delivery_rate)
         stamp = _money(entry_value * schedule.stamp_delivery_buy_rate)
     else:
-        # STT is on the sell side only; stamp duty is on the buy side only.
         if position.direction is AdviceDirection.LONG:
             exit_stt = _stt_rupee(exit_value * schedule.stt_intraday_sell_rate)
             stamp = _money(entry_value * schedule.stamp_intraday_buy_rate)
@@ -544,7 +542,6 @@ def required_exit_price_for_net_target(
                 return candidate
             candidate = _money(candidate + step)
     else:
-        # For a short, lower cover price improves P&L. Find the highest price that still meets target.
         low, high = PAISE, position.entry_reference_price * D("2")
         if pnl(low) < target:
             raise AdviceCostValidationError("requested short net target is not attainable above zero price")
@@ -555,7 +552,6 @@ def required_exit_price_for_net_target(
             else:
                 high = mid
         step = _dec(tick_size, "tick_size", positive=True) if tick_size is not None else PAISE
-        # Floor to a tradable grid because lower price helps a short.
         units = (low / step).to_integral_value(rounding="ROUND_FLOOR")
         candidate = _money(units * step)
         for _ in range(20):
