@@ -1,4 +1,4 @@
-"""Thin bridge from TradeBrain Phase-7 candidates to Vibe SDM/strategy-store.
+"""Thin bridge from TradeBrain candidates to Vibe SDM/strategy-store.
 
 The bridge deliberately does not register or activate anything by itself. It
 builds a governed research Artifact that callers may pass through Vibe's
@@ -56,8 +56,9 @@ def build_sdm_research_artifact(
         "Research-only TradeBrain/BSE candidate. Not approved for live execution; "
         "tradebrain_bse remains advisory-only. Hard owner/exchange/broker rules are "
         "outside the learnable parameter set. Generic SDM thresholds do not prove "
-        "BSE profitability or authorize promotion. Net economics remain unavailable "
-        "until the dedicated MTF cost engine is validated."
+        "BSE profitability or authorize promotion. Net economics must be validated "
+        "through TradeBrain's resident advisory cost context; optional MTF funding, "
+        "if introduced, requires separate verified economics and does not change policy."
     )
     intended_use = (
         "Coordinate BSE candidate research, replay, validation history and decay "
@@ -90,7 +91,7 @@ def build_sdm_research_artifact(
         validator=(str(validator).strip() if validator else None),
         approver=(str(approver).strip() if approver else None),
         model_version=candidate.version,
-        artifact_version="tradebrain-phase7",
+        artifact_version="tradebrain-research",
         model_tier=ModelTier.TIER_2_SIGNIFICANT,
         intended_use=intended_use,
         limitations=limitations,
