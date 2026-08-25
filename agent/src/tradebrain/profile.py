@@ -42,8 +42,8 @@ class SwingPolicy:
     long_allowed: bool
     short_allowed: bool
     funding_mechanism: str
-    mtf_allowed: bool = False
-    mtf_required: bool = False
+    mtf_allowed: bool
+    mtf_required: bool
 
 
 @dataclass(frozen=True)
@@ -93,9 +93,9 @@ _POLICY = TradeBrainBSEPolicy(
     swing=SwingPolicy(
         long_allowed=True,
         short_allowed=False,
-        funding_mechanism="CASH_DELIVERY_OWN_FUNDS_ONLY",
-        mtf_allowed=False,
-        mtf_required=False,
+        funding_mechanism="ZERODHA_MTF_ONLY",
+        mtf_allowed=True,
+        mtf_required=True,
     ),
     ai=AIPolicy(
         context_allowed=True,
